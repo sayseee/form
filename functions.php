@@ -70,7 +70,24 @@ function get_matches_by_date() {
                 $day = date_format($day,"d M");
             }
             echo '<div class="fixture">';
-            echo '<a class="grid item-link" data-toggle="modal" data-id="'.$match->id.'" data-target="#lab-slide-bottom-popup">';
+            echo '<a class="grid desk-link item-links" data-id="'.$match->id.'">';
+            echo '<div>'.$home.'</div>';
+            echo '<div class="fc">';
+            if ($match->status->finished == false) : 
+                echo '<span class="time">'.$time.'</span>';
+            elseif ($match->status->finished == true and $match->status->reason->short == 'PP') : 
+                echo '<span>PP</span>';
+            elseif ($match->status->finished == true and $match->status->reason->short == 'Can') : 
+                echo '<span>Canc.</span>';
+            elseif ($match->status->finished == true) : 
+                echo '<span class="score">
+                <span '.(($score1 > $score2)?'class="winner"':"").'">'.$score1.'</span>
+                <span '.(($score1 < $score2)?'class="winner"':"").'">'.$score2.'</span></span><span><small>FT</small></span>';
+            endif;
+            echo '</div>';
+            echo '<div>'.$away.'</div>';
+            echo '</a>';
+            echo '<a class="grid mobile-link item-link" data-toggle="modal" data-id="'.$match->id.'" data-target="#lab-slide-bottom-popup">';
             echo '<div>'.$home.'</div>';
             echo '<div class="fc">';
             if ($match->status->finished == false) : 

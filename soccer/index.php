@@ -51,7 +51,16 @@ require_once '../functions.php';
                 </div>
             </div>
         </div>
-        <?php echo get_matches_by_date();?>
+    <div class="wrap">
+        <div class="match-content-data">
+            <?php echo get_matches_by_date();?>
+        </div>
+        <div div class="right-side d-none d-sm-block d-sm-none d-md-block">
+            <div id="sideDetails">
+            left content
+            </div>
+        </div>
+    </div>
         <script src="" async defer></script>
         <div class="MobileFooter">
             <div>
@@ -139,14 +148,29 @@ require_once '../functions.php';
             </div>
         </div>
     <!-- MODAL CONTENT SAMPLE STARTS HERE -->
-    <div class="modal fade" id="lab-slide-bottom-popup" data-keyboard="false" data-backdrop="false">
+    <div class="modal fade hidden-lg hidden-md" id="lab-slide-bottom-popup" data-keyboard="false" data-backdrop="false">
         <div class="lab-modal-body">
         <div id="gameDetails">
             
-            </div>
+        </div>
         </div>
     </div>
     <script>
+
+$(document).ready(function() { 
+    $("a.item-links").click(function(e) {  
+        e.preventDefault();
+        $("#sideDetails").html('<div class="loader"><svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><style>.spinner_6KQt{animation:spinner_4IqM 1.2s cubic-bezier(0.52,.6,.25,.99) infinite}@keyframes spinner_4IqM{0%{transform:translate(12px,12px) scale(0);opacity:1}100%{transform:translate(0,0) scale(1);opacity:0}}</style><path class="spinner_6KQt" d="M12,1A11,11,0,1,0,23,12,11,11,0,0,0,12,1Zm0,20a9,9,0,1,1,9-9A9,9,0,0,1,12,21Z" transform="translate(12, 12) scale(0)"/></svg></div>');
+        $.ajax({ 
+        type: 'POST',
+        url: "../side-details.php?id=" + e.currentTarget.dataset.id, 
+        success: function(data) {
+            $("#sideDetails").html(data);
+        }
+        });
+
+    });
+});
 
 $(document).ready(function() { 
     $("a.item-link").click(function(e) {  

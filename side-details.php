@@ -6,7 +6,7 @@ $match_id = $_GET['id'];
 $match = get_match_details($match_id); 
 $obj = get_leagues();
 echo get_teams_match_details($obj, $match, $match_id);
-
+ 
 $stadium = $match->content->matchFacts->infoBox->Stadium;
 $homeTeam = $match->general->homeTeam->name;
 $awayTeam = $match->general->awayTeam->name;
@@ -45,7 +45,8 @@ endif;
 endif;
 
 $form = array(); 
-?> 
+?>
+</div>
         <div id="scroll">
             <div class="content">
                 <?php echo h2h($match); ?>
@@ -62,11 +63,11 @@ $form = array();
                     } else {
                         ?> 
                 
-            <h5 class="headings">Goal Statistics</h5>
+            <h5 class="">Goal Statistics</h5>
             <div class="goals"><?php  echo get_team_forms($data_home, $data_away, $home_id, $away_id); ?></div>
             <?php } if ($league->overview->table == null): echo '';
 else: ?>
-            <h5 class="headings">Season Table - Home/Away</h5>
+            <h5 class="">Season Table - Home/Away</h5>
             <div class="league_table_form">              
                 <table width="100%" class="form-table">
                     <thead>
@@ -130,7 +131,7 @@ else: ?>
                 endforeach;
                 ?>
             </table>
-            <h5 style="text-align:center;" class="headings">About the match</h5>
+            <h5 style="text-align:center;">About the match</h5>
             <?php
             echo '<p>'.$homeTeam.' #'.$ah_pos.' in league standings is playing home against '.$awayTeam.' #'.$aw_pos.' '.(($stadium == null)?'':' at '.$stadium->name).' on '.$data_time.'.</p>';  
             echo '<p>'.$homeTeam.' has '.$home_points.' points from the last '.$home_played.' games played at home which is '.sprintf('%0.1f',($home_points/$ah_points)*100).'% of all points in league overall and 
@@ -150,7 +151,7 @@ else: ?>
            <?php endif; if ($form == null) { 
                 echo '';
            } else {?>
-            <h5 class="headings">Form - Last 5</h5>
+            <h5 class="">Form - Last 5</h5>
             <div class="form-last-five form">
                 <?php 
                 echo '<div>';

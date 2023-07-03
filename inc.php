@@ -97,7 +97,7 @@ echo '<div class="team-names">';
             }
                 echo '</span>
             </div>';
-echo '</div>';
+echo '</div></div>';
         }
 
 function h2h($match) {
@@ -106,7 +106,7 @@ function h2h($match) {
     else :
     $h2h = $match->content->h2h->summary;
     if(sizeof($h2h) > 0 ){
-        echo '<h5 class="">Head-to-Head</h5>';
+        echo '<h5 class="headings">Head-to-Head</h5>';
         echo '<div class="H2hHeader">';
     $i = 0;
     $len = count($h2h);
