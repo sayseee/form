@@ -674,6 +674,19 @@
             "localizedName": "Azerbaijan"
         },
         {
+            "ccode": "BAN",
+            "name": "Bangladesh",
+            "leagues": [
+                {
+                    "id": 10443,
+                    "name": "Premier League",
+                    "localizedName": "Premier League",
+                    "pageUrl": "\/leagues\/10443\/overview\/premier-league"
+                }
+            ],
+            "localizedName": "Bangladesh"
+        },
+        {
             "ccode": "BLR",
             "name": "Belarus",
             "leagues": [

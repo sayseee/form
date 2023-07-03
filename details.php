@@ -107,10 +107,70 @@ echo '</div>';
         <div id="scroll">
             <div class="content">
                 <?php 
+                if(isset($match->content->h2h->summary)){
+                    echo '<h5 class="">Head-to-Head</h5>';
+                    echo '<div class="H2hHeader">';
+                $h2h = $match->content->h2h->summary;
+                $i = 0;
+                $len = count($h2h);
+                foreach ($h2h as $value) {
+                    if ($i == 0) {
+                        echo '<div>
+                            <span>'.$value.'</span>
+                            <span>Wins</span>
+                        </div>';
+                    } 
+                    else if ($i == 1) {
+                        echo '<div>
+                            <span>'.$value.'</span>
+                            <span>Draws</span>
+                        </div>';
+                    } else if ($i == $len - 1) {
+                        echo '<div>
+                            <span>'.$value.'</span>
+                            <span>Wins</span>
+                        </div>';
+                    }
+                    // …
+                    $i++;
+                }
+                echo '</div>';
+                } else {
+                    echo '';
+                }
+ 
+                if(isset($match->content->h2h->matches)){
+                $h2hmatches = $match->content->h2h->matches;
+                echo '<div class="H2hContent">';
+                $i = 0;
+                foreach ($h2hmatches as $m) {
+                    if ($m->status->started == true ) {
+                        $utcDate = $m->time->utcTime;
+                        echo '<div class="gameList">';
+                        if(strtotime($utcDate) < strtotime('-360 days')) {
+                                $time = date('Y', strtotime($utcDate));
+                                echo '<div>'.$time.'</div>';
+                            } else {
+                                $htime = date('y.m', strtotime($utcDate));
+                                echo '<div>'.$htime.'</div>';
+                            } 
+                                echo '<div>'.$m->home->name.'</div>
+                                <div> - </div>
+                                <div>'.$m->away->name.'</div>
+                                <div>'.$m->status->scoreStr.'</div>';
+                        echo '</div>';
+                    }
+                    if( $i++ == 4) : break; endif;  
+                    }
+                echo '</div>';                
+                }
+                ?>
+                <?php 
                 $league_id = $match->general->parentLeagueId;  
                 $league = get_league_details($league_id); 
                 $home_id = $match->general->homeTeam->id;
-                $away_id = $match->general->awayTeam->id; 
+                $away_id = $match->general->awayTeam->id;
+                $legend = $league->table[0]->data->legend; 
                 if (isset($league->stats->teams)) {
                     $stats = $league->stats->teams;
                 } else { $stats = null; }
@@ -118,73 +178,22 @@ echo '</div>';
                     $all = $league->table[0]->data->table->all;
                     $home = $league->table[0]->data->table->home;
                     $away = $league->table[0]->data->table->away; 
-                    $form = $league->table[0]->data->table->form; 
                 } elseif(isset($league->table[0]->data->tables)) {
                     $all = $league->table[0]->data->tables[0]->table->all;
                     $home = $league->table[0]->data->tables[0]->table->home;
                     $away = $league->table[0]->data->tables[0]->table->away;
-                    $form = $league->table[0]->data->tables[0]->table->form;
                 }
                 
-                if($league->table == null) {
-                    echo '';
-                } else { 
-                ?>                
-                <table width="100%" class="form-table">
-                    <thead>
-                        <tr>
-                            <th scope="col">Pos</th>
-                            <th scope="col">Teams</th>
-                            <th scope="col">P</th>
-                            <th scope="col">W</th>
-                            <th scope="col">D</th>
-                            <th scope="col">L</th>
-                            <th scope="col">Goals</th>
-                            <th scope="col">Pts</th>
-                        </tr>
-                    </thead> 
-                <?php
-                foreach($all as $a):
-                    if ($a->id == $home_id or $a->id == $away_id): 
-                        echo '<tr>
-                        <td><span style="padding:1px 4px 0; height:15px; '.(($a->qualColor == null )?'':':before{background-color:'.$a->qualColor.'}; width:3px; height: 15px;').'">'.$a->idx.'</span></td>
-                        <td>'.$a->name.'</td>';
-                        if ($a->id == $home_id):
-                            foreach($home as $ht):
-                                if($ht->id == $a->id):
-                                    echo '<td>'.$ht->played.'</td>
-                                    <td>'.$ht->wins.'</td>
-                                    <td>'.$ht->draws.'</td>
-                                    <td>'.$ht->losses.'</td>
-                                    <td>'.$ht->scoresStr.'</td>
-                                    <td>'.$ht->pts.'-'.$a->pts.'</td>'; 
-                                endif;
-                            endforeach;
-                            elseif($a->id == $away_id):
-                                foreach($away as $at): 
-                                if ($at->id == $a->id):
-                                    echo '<td>'.$at->played.'</td>
-                                    <td>'.$at->wins.'</td>
-                                    <td>'.$at->draws.'</td>
-                                    <td>'.$at->losses.'</td>
-                                    <td>'.$at->scoresStr.'</td>
-                                    <td>'.$at->pts.'-'.$a->pts.'</td>'; 
-                                endif;
-                            endforeach;
-                        endif; 
-
-                      echo '</tr>';
-                    endif; 
-                endforeach;
-                ?>
-            </table>
-            
+                
+                    if($match->content->matchFacts->teamForm == null) { echo ''; }
+                    else {?> 
+                
+                <h5 class="">Goal Statistics</h5>
             <div class="goals">
                 <?php 
-                if($match->content->matchFacts->teamForm == null) { echo ''; }
-                else {
                 $data_home = $match->content->matchFacts->teamForm[0];
                 $data_away = $match->content->matchFacts->teamForm[1];
+                $i = 0;
                 $ahs = 0;
                 $ahc = 0;
                 $btts = 0;
@@ -215,8 +224,10 @@ echo '</div>';
                     if(((int)$goal1 + (int)$goal2) >=3.5):
                     $o35 = $o35 + 1;
                     endif;
+                    $i++;
                 endforeach;
 
+                $ai = 0;
                 $aws = 0;
                 $awc = 0;
                 $abtts = 0;
@@ -247,47 +258,165 @@ echo '</div>';
                     if(((int)$goal1 + (int)$goal2) >=3.5):
                     $ao35 = $ao35 + 1;
                     endif;
+                    $ai++;
                 endforeach;
                 echo '<div class="goal-stats f r ac">
-                      <div class="f-1 ac tr num-stat">'.$ahs.'</div>
+                      <div class="f-1 ac tr num-stat">'.sprintf("%.0f", ($ahs/$i*100)).'%</div>
                       <div class="spacer f ac jc wide"><span>FTS</span></div> 
-                      <div class="f-1 ac tr num-stat">'.$aws.'</div>                     
+                      <div class="f-1 ac tr num-stat">'.sprintf("%.0f", ($aws/$ai*100)).'%</div>                     
                       </div>';
                 echo '<div class="goal-stats f r ac">
-                      <div class="f-1 ac tr num-stat">'.$ahc.'</div>
+                      <div class="f-1 ac tr num-stat">'.sprintf("%.0f", ($ahc/$i*100)).'%</div>
                       <div class="spacer f ac jc wide"><span>CS</span></div> 
-                      <div class="f-1 ac tr num-stat">'.$awc.'</div>                     
+                      <div class="f-1 ac tr num-stat">'.sprintf("%.0f", ($awc/$ai*100)).'%</div>                     
                       </div>';
                 echo '<div class="goal-stats f r ac">
-                      <div class="f-1 ac tr num-stat">'.$btts.'</div>
+                      <div class="f-1 ac tr num-stat">'.sprintf("%.0f", ($btts/$i*100)).'%</div>
                       <div class="spacer f ac jc wide"><span>BTTS</span></div> 
-                      <div class="f-1 ac tr num-stat">'.$abtts.'</div>                     
+                      <div class="f-1 ac tr num-stat">'.sprintf("%.0f", ($abtts/$ai*100)).'%</div>                     
                       </div>';
                 echo '<div class="goal-stats f r ac">
-                      <div class="f-1 ac tr num-stat">'.$o15.'</div>
+                      <div class="f-1 ac tr num-stat">'.sprintf("%.0f", ($o15/$i*100)).'%</div>
                       <div class="spacer f ac jc wide"><span>Over 1.5</span></div> 
-                      <div class="f-1 ac tr num-stat">'.$ao15.'</div>                     
+                      <div class="f-1 ac tr num-stat">'.sprintf("%.0f", ($ao15/$ai*100)).'%</div>                     
                       </div>';
                 echo '<div class="goal-stats f r ac">
-                      <div class="f-1 ac tr num-stat">'.$o25.'</div>
+                      <div class="f-1 ac tr num-stat">'.sprintf("%.0f", ($o25/$i*100)).'%</div>
                       <div class="spacer f ac jc wide"><span>Over 2.5</span></div> 
-                      <div class="f-1 ac tr num-stat">'.$ao25.'</div>                     
+                      <div class="f-1 ac tr num-stat">'.sprintf("%.0f", ($ao25/$ai*100)).'%</div>                     
                       </div>';
                 echo '<div class="goal-stats f r ac">
-                      <div class="f-1 ac tr num-stat">'.$o35.'</div>
+                      <div class="f-1 ac tr num-stat">'.sprintf("%.0f", ($o35/$i*100)).'%</div>
                       <div class="spacer f ac jc wide"><span>Over 3.5</span></div> 
-                      <div class="f-1 ac tr num-stat">'.$ao35.'</div>                     
+                      <div class="f-1 ac tr num-stat">'.sprintf("%.0f", ($ao35/$ai*100)).'%</div>                     
                       </div>';
-            } ?>                       
+            ?>                       
             <div class="fixture-summary mt10"> 
-                <span><span>BTTS</span><span class="f r f-1 ac">50%</span></span>
-                <span><span>O 1.5</span><span class="f r f-1 ac">70%</span></span>
-                <span><span>O 2.5</span><span class="f r f-1 ac">50%</span></span>
-                <span><span>U 2.5</span><span class="f r f-1 ac">50%</span></span>
-                <span><span>O 3.5</span><span class="f r f-1 ac">30%</span></span>
-                <span><span>U 3.5</span><span class="f r f-1 ac">70%</span></span>
+                <span><span>BTTS</span><span class="f r f-1 ac"><?php printf("%.0f", ((($btts/$i)+($abtts/$ai))/2)*100);?>%</span></span>
+                <span><span>O 1.5</span><span class="f r f-1 ac"><?php printf("%.0f", ((($o15/$i)+($ao15/$ai))/2)*100);?>%</span></span>
+                <span><span>O 2.5</span><span class="f r f-1 ac"><?php printf("%.0f", ((($o25/$i)+($ao25/$ai))/2)*100);?>%</span></span>
+                <span><span>U 2.5</span><span class="f r f-1 ac"><?php printf("%.0f", (1-(($o25/$i)+($ao25/$ai))/2)*100);?>%</span></span>
+                <span><span>O 3.5</span><span class="f r f-1 ac"><?php printf("%.0f", ((($o35/$i)+($ao35/$ai))/2)*100);?>%</span></span>
+                <span><span>U 3.5</span><span class="f r f-1 ac"><?php printf("%.0f", (1-(($o35/$i)+($ao35/$ai))/2)*100);?>%</span></span>
             </div>
-            <div class="form">
+            </div>
+            <?php } ?>
+            <h5 class="">Season Table - Home/Away</h5>
+            <div class="league_table_form">              
+                <table width="100%" class="form-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Pos</th>
+                            <th scope="col">Teams</th>
+                            <th scope="col">P</th>
+                            <th scope="col">W</th>
+                            <th scope="col">D</th>
+                            <th scope="col">L</th>
+                            <th scope="col">Goals</th>
+                            <th scope="col">Pts</th>
+                        </tr>
+                    </thead> 
+                <?php
+                $tables = $league->overview;
+                $form = array(); 
+                foreach($tables as $k => $v) { 
+                    if($k == 'table'):
+                        $table = $tables->table;
+                        foreach($table as $tab):
+                            $data = $tab->data;
+                            foreach($data as $d => $x):                        
+                        if($d == 'table'):
+                            $tabbed = $data->table;
+                            foreach($tabbed as $tabs => $tab):
+                            if($tabs == 'form'):
+                                $form = $tabbed->form;
+                            endif;
+                            endforeach;
+                        elseif($d == 'tables'):
+                            $tabbed = $data->tables;
+                            foreach($tabbed as $tabs => $tab):
+                                if($tabs == 'form'):
+                                $form = $tabbed->form;
+                            endif;
+                            endforeach;
+                        endif;
+                        endforeach;
+                        endforeach;
+                        endif;
+                }
+                foreach($all as $a):
+                    if ($a->id == $home_id or $a->id == $away_id): 
+                        echo '<tr>
+                        <td><span style="padding:1px 4px 0; height:15px; '.(($a->qualColor == null )?'':':before{background-color:'.$a->qualColor.'}; width:3px; height: 15px;').'">'.$a->idx.'</span></td>
+                        <td>'.$a->name.'</td>';
+                        if ($a->id == $home_id):
+                            $home_points = 0;
+                            $ah_points = $a->pts;
+                            $homeTeam = $a->name;
+                            $ah_pos = $a->idx;
+                            foreach($home as $ht):
+                                if($ht->id == $a->id):
+                                    echo '<td>'.$ht->played.'</td>
+                                    <td>'.$ht->wins.'</td>
+                                    <td>'.$ht->draws.'</td>
+                                    <td>'.$ht->losses.'</td>
+                                    <td>'.$ht->scoresStr.'</td>
+                                    <td>'.$ht->pts.'</td>';
+                                    $home_points = $ht->pts;
+                                    $home_played = $ht->played;
+                                    $all_points = $a->pts;
+                                endif;
+                            endforeach;
+                            elseif($a->id == $away_id):
+                                $away_points = 0;
+                                $aw_points = $a->pts;
+                                $aw_pos = $a->idx;
+                                $awayTeam = $a->name;
+                                foreach($away as $at): 
+                                if ($at->id == $a->id):
+                                    echo '<td>'.$at->played.'</td>
+                                    <td>'.$at->wins.'</td>
+                                    <td>'.$at->draws.'</td>
+                                    <td>'.$at->losses.'</td>
+                                    <td>'.$at->scoresStr.'</td>
+                                    <td>'.$at->pts.'</td>';
+                                    $away_points = $at->pts; 
+                                    $away_played = $at->played; 
+                                endif;
+                            endforeach;
+                        endif; 
+
+                      echo '</tr>';
+                    endif; 
+                endforeach;
+                ?>
+            </table>
+            <h5 style="text-align:center;">About the match</h5>
+            <?php
+            $stadium = $match->content->matchFacts->infoBox->Stadium;
+            $homeTeam = $match->general->homeTeam->name;
+            $awayTeam = $match->general->awayTeam->name;
+            $data_time = $match->general->matchTimeUTC;
+            echo '<p>'.$homeTeam.' #'.$ah_pos.' in league standings is playing home against '.$awayTeam.' #'.$aw_pos.' '.(($stadium == null)?'':' at '.$stadium->name).' on '.$data_time.'.</p>';  
+            echo '<p>'.$homeTeam.' has '.$home_points.' points from the last '.$home_played.' games played at home which is '.sprintf('%0.1f',($home_points/$ah_points)*100).'% of all points in league overall and 
+            '.$awayTeam.' has '.$away_points.' points from the last '.$away_played.' games played at away which is '.sprintf('%0.1f',($away_points/$aw_points)*100).'% of all points in league overall and 
+            </p>';  
+                if($legend > 0) :
+                foreach($legend as $le):
+                foreach($le->indices as $index):
+                        echo ($index + 1).' '.$le->title.'<br />';
+                endforeach;
+                endforeach;
+                echo '';
+                endif;
+            ?>
+
+        </div>
+           <?php if ($form == null) { 
+                echo '';
+           } else {?>
+            <h5 class="">Form - Last 5</h5>
+            <div class="form-last-five form">
                 <?php 
                 echo '<div>';
                 foreach($form as $f) {
@@ -314,38 +443,45 @@ echo '</div>';
                     echo '</div>';
                 ?>
             </div>
-            <?php  } ?>
-                <div class="match-team-stats">
-                    <?php
+                    <?php }
                     if($stats == null) {
                         echo '';
                     } else {
-                            echo '<div>';
+
+                        echo '<h5 class="">Team Statistics</h5>';
+                        echo '<div class="match-team-stats">';
+                        
+                            echo '<div class="statList">';
+                            echo '<div class="statList-item"><span>#</span><span>Home Team Stats</span><span></span></div>';
                         foreach($stats as $stat) {
                             foreach($stat->topThree as $tt) {
-                                if ($tt->teamId == $home_id): 
-                                        echo 'Ranked '.$tt->rank.' in '.$stat->header.'<br /> ';
-                                        echo $tt->name.' - '.$tt->value.'<br /> ';
+                                if ($tt->teamId == $home_id):
+                                    echo '<div class="statList-item">';
+                                        echo '<span>'.$tt->rank.'</span>';
+                                        echo '<span>'.$stat->header.'</span>';
+                                        echo '<span>'.$tt->value.'</span>';;
+                                        echo '</div>';
                                 endif;   
                             }
                         }
                             echo '</div>';
-                    }
-                    if($stats == null) {
-                        echo '';
-                    } else {
-                            echo '<div>';
+                            
+                            echo '<div class="statList">';
+                            echo '<div class="statList-item"><span>#</span><span>Away Team Stats</span><span></span></div>';
                         foreach($stats as $stat) {
                             foreach($stat->topThree as $tt) { 
-                                if ($tt->teamId == $away_id): 
-                                    echo 'Ranked '.$tt->rank.' in '.$stat->header.'<br /> ';
-                                        echo $tt->name.' - '.$tt->value.'<br /> ';
+                                if ($tt->teamId == $away_id):
+                                    echo '<div class="statList-item">';
+                                        echo '<span>'.$tt->rank.'</span>';
+                                        echo '<span>'.$stat->header.'</span>';
+                                        echo '<span>'.$tt->value.'</span>';;
+                                        echo '</div>';
                                 endif;  
                             }
                         }
                             echo '</div>';
+                    echo '</div>';
                     }
                     ?>
-                </div>
             </div>
         </div>
